@@ -1,23 +1,25 @@
 # nanopi-m4-armbian-openzfs WIP!
-Instructions to help you setup a ZFS root file system with RAIDZ1 on a nanopi-m4 with 4 port SATA hat
+Instructions to help you setup a ZFS root file system with RAIDZ1 on a nanopi-m4 with a 4 port SATA hat
 ## Requirements
-- nanopi m4
+- NanoPi m4
 - 4xSATA hata
 - Armbian installation with bullseye 5.15.x kernel
 ## Aim
 This installation stores the SPL, u-boot and initramfs files on the SD card and while the root filesystem is stored on the raid drive. U-boot and initramfs will be configured to bypass the root file system on the SD card and to load from the zpool dataset root file system.
 
-## Quick Overview of Installation Steps
+# Installation
+## Overview of Installation Steps
 - Build Armbian from source - since current versions of Armbian didn't seem to support SD card boot for my NanoPi M4.
 - Install necessary ZFS packages
-- Setup RAIDZ drives rpool a MIRROR could also be used
-- Modify initramfs modules to load and rebuild initramfs
-- Update initramfs
+- Create RAIDZ pool and datasets 
+- Copy of root file system to new raid array
+- Setup modules needed for initramfs to load ZFS and rebuild initramfs
+- 
 - Modify armbianENV.txt to use bootargs (extraargs) to boot from ZFS ROOT with  
 - Copy root file system from SD card to zpool dataset using rsync
 - Reboot
 
-# The details
+
 ## The Boot Process
 Before starting it is useful to describe the boot process of this NanoPi M4. After a hardware reset the boot ROM loads a SPL boot loader (secondary program loader - a stripped down version of u-boot) from the SD card, memory is configured and then u-boot is started in full. U-boot then loads the kernel and (in this case) the initial RAM disk initramfs, and then transfers control the kernel.
 
@@ -97,8 +99,8 @@ update-initramfs -u
 Comment out, rootdev, rootfstype and add extraargs
 ```` 
 ...
-#rootdev=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
-#rootfstype=ext
+rootdev=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+rootfstype=ext
 ...
 extraargs=root=rpool/ROOT/debian-1 boot=zfs
 ```
